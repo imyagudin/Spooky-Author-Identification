@@ -53,3 +53,5 @@ my_ml_project/
 ├── setup.py # Скрипт для установки проекта.
 └── README.md # Основная документация проекта.
 ```
+
+source venv/bin/activate
