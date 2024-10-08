@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import torch
 from torch import nn
-from torch import optim
 from IPython.display import clear_output
 
 def train_model(
@@ -18,7 +17,7 @@ def train_model(
 
     epochs = epochs if epochs is not None else 1
 
-    optimizer = optimizer if optimizer is not None else optim.Adam(model.parameters())
+    optimizer = optimizer if optimizer is not None else torch.optim.Adam(model.parameters())
     loss_function = loss_function if loss_function is not None else nn.CrossEntropyLoss()
 
     history = []
