@@ -1,8 +1,15 @@
 import os
+import sys
 
 import pandas as pd
 
+project_path = os.path.abspath(os.path.join(os.getcwd(), '..'))
+sys.path.append(project_path)
+
+from src.utils.logging_utils import get_logger
+
 def read_file(file_path: str) -> pd.DataFrame:
+    logger = get_logger(__name__)
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Файл {file_path} не найден.")
     file_extension = os.path.splitext(file_path)[1].lower()
@@ -14,3 +21,4 @@ def read_file(file_path: str) -> pd.DataFrame:
         return pd.read_json(file_path)
     else:
         raise ValueError(f"Неподдерживаемый формат файла: {file_extension}")
+    logger.info(f"File {file_path} read successfully")
