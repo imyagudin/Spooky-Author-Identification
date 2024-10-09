@@ -1,27 +1,45 @@
+import os
+import sys
+
+import numpy as np
 import matplotlib.pyplot as plt
 import torch
 from torch import nn
 from IPython.display import clear_output
 
+project_path = os.path.abspath(os.path.join(os.getcwd(), '..'))
+sys.path.append(project_path)
+
+from src.utils.logging_utils import get_logger
+
 def test_model(
-        model,
-        dataloader,
-        device=None
+        model: nn.Module,
+        dataloader: torch.utils.data.DataLoader,
+        loss_function: nn.Module=None,
+        device: torch.device=None
 ):
-    device = device if device is not None else torch.device("cpu")
-    model.to(device)
+    logger = get_logger(__name__)
+    logger.info("Start test the model")
+
     model.eval()
+    logger.info("The model has been switched to evaluate mode.")
+    device = device if device is not None else torch.device("cpu")
+    logger.info(f"Device selected: {device}")
+    model.to(device)
 
-    logloss = num_samples = 0.0
-    epsilon = 1e-15
+    loss_function = loss_function if loss_function is not None else nn.CrossEntropyLoss()
 
-    for batch, targets in dataloader:
+    history = []
+    for idx, (batch, target) in enumerate(dataloader):
         with torch.no_grad():
-            targets = targets.float().to(device)
+            batch = batch.to(device)
+            target = target.float().to(device)
             predictions = model(batch)
-            predictions = nn.functional.softmax(predictions, dim=1)
-            predictions = torch.clamp(predictions, min=epsilon, max=1-epsilon)
-            logloss += -torch.sum(targets * torch.log(predictions)).item()
-            num_samples += len(batch)
-
-    return logloss / num_samples
+            loss = loss_function(predictions, target)
+            history.append(loss.item())
+            if (idx + 1) % 10 == 0:
+                clear_output(True)
+                plt.plot(history, label="loss")
+                plt.legend()
+                plt.show()
+    logger.info(f"Test {loss_function}: {np.mean(history)}")
